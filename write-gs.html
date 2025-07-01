@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>寫入 Google Sheet</title>
+  <link rel="stylesheet" href="style.css">
+  <script defer src="write-gs.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>寫入 Google Sheet</h1>
+    <form id="gsForm">
+      <label for="col1">欄位1：</label>
+      <input type="text" id="col1" name="col1" required><br><br>
+      <label for="col2">欄位2：</label>
+      <input type="text" id="col2" name="col2" required><br><br>
+      <button type="submit" class="button">送出</button>
+    </form>
+    <div id="result" style="margin-top:20px;"></div>
+  </div>
+</body>
+</html>
