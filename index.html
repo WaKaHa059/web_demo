@@ -59,7 +59,81 @@ document.getElementById('addForm').addEventListener('submit', function(e) {
     form.extra.value,
     form.actual.value
   ];
-  fetch(PROXY_URL, {
+  fetch(PROXY_URL, {  function loadSheetData() {
+    fetch(PROXY_URL)
+      .then(res => res.json())
+      .then(data => {
+        const tbody = document.getElementById('dataTableBody');
+        tbody.innerHTML = '';
+        data.forEach((row, idx) => {
+          if(idx === 0) return; // 跳過標題列
+          const tr = document.createElement('tr');
+          row.forEach(cell => {
+            const td = document.createElement('td');
+            td.textContent = cell;
+            tr.appendChild(td);
+          });
+          // 編輯按鈕
+          const editTd = document.createElement('td');
+          editTd.innerHTML = `<button onclick="editRow(${idx})">編輯</button>`;
+          tr.appendChild(editTd);
+          tbody.appendChild(tr);
+        });
+      });
+  }
+  
+  // 編輯列
+  window.editRow = function(idx) {
+    fetch(PROXY_URL)
+      .then(res => res.json())
+      .then(data => {
+        const row = data[idx];
+        // 將 row 資料填入表單
+        const form = document.getElementById('addForm');
+        [
+          'date','machine','start','end','bad','real','sale','extra','actual'
+        ].forEach((name, i) => {
+          form[name].value = row[i] || '';
+        });
+        form.setAttribute('data-edit-index', idx);
+      });
+  };
+  
+  // 表單送出時判斷是新增還是編輯
+  document.getElementById('addForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const form = e.target;
+    const data = [
+      form.date.value, form.machine.value, form.start.value, form.end.value,
+      form.bad.value, form.real.value, form.sale.value, form.extra.value, form.actual.value
+    ];
+    const editIndex = form.getAttribute('data-edit-index');
+    let fetchOptions;
+    if (editIndex) {
+      fetchOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'update', rowIndex: Number(editIndex), data })
+      };
+      form.removeAttribute('data-edit-index');
+    } else {
+      fetchOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data })
+      };
+    }
+    fetch(PROXY_URL, fetchOptions)
+      .then(res => res.text())
+      .then(result => {
+        document.getElementById('result').textContent = '✅ 操作成功！';
+        form.reset();
+        loadSheetData();
+      })
+      .catch(err => {
+        document.getElementById('result').textContent = '❌ 操作失敗: ' + err;
+      });
+  });
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ data })
