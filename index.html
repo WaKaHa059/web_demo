@@ -21,37 +21,83 @@
       <button type="submit" class="report-btn">送出</button>
     </form>
     <div id="result"></div>
+    <hr style="margin:32px 0;">
+    <h2>Google Sheet 資料表</h2>
+    <table style="width:100%;border-collapse:collapse;">
+      <thead>
+        <tr>
+          <th>日期</th>
+          <th>機號</th>
+          <th>開機錶碼</th>
+          <th>收機錶碼</th>
+          <th>壞紙</th>
+          <th>實際銷紙</th>
+          <th>銷售金額</th>
+          <th>額外金額</th>
+          <th>實際金額</th>
+        </tr>
+      </thead>
+      <tbody id="dataTableBody">
+        <!-- 資料將由JS動態填充 -->
+      </tbody>
+    </table>
   </div>
   <script>
-    const PROXY_URL = 'https://morning-sun-421f.lolwahaha958.workers.dev/';
-    document.getElementById('addForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const form = e.target;
-      const data = [
-        form.date.value,
-        form.machine.value,
-        form.start.value,
-        form.end.value,
-        form.bad.value,
-        form.real.value,
-        form.sale.value,
-        form.extra.value,
-        form.actual.value
-      ];
-      fetch(PROXY_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ data })
-      })
-        .then(res => res.text())
-        .then(result => {
-          document.getElementById('result').textContent = '✅ 寫入成功！';
-          form.reset();
-        })
-        .catch(err => {
-          document.getElementById('result').textContent = '❌ 寫入失敗: ' + err;
-        });
+const PROXY_URL = 'https://morning-sun-421f.lolwahaha958.workers.dev/';
+
+document.getElementById('addForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const form = e.target;
+  const data = [
+    form.date.value,
+    form.machine.value,
+    form.start.value,
+    form.end.value,
+    form.bad.value,
+    form.real.value,
+    form.sale.value,
+    form.extra.value,
+    form.actual.value
+  ];
+  fetch(PROXY_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ data })
+  })
+    .then(res => res.text())
+    .then(result => {
+      document.getElementById('result').textContent = '✅ 寫入成功！';
+      form.reset();
+      loadSheetData(); // 寫入後自動刷新表格
+    })
+    .catch(err => {
+      document.getElementById('result').textContent = '❌ 寫入失敗: ' + err;
     });
-  </script>
+});
+
+// 讀取 Google Sheet 並渲染表格
+function loadSheetData() {
+  fetch(PROXY_URL)
+    .then(res => res.json())
+    .then(data => {
+      const tbody = document.getElementById('dataTableBody');
+      tbody.innerHTML = '';
+      data.forEach((row, idx) => {
+        if(idx === 0) return; // 跳過標題列
+        const tr = document.createElement('tr');
+        row.forEach(cell => {
+          const td = document.createElement('td');
+          td.textContent = cell;
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+    })
+    .catch(err => {
+      document.getElementById('dataTableBody').innerHTML = '<tr><td colspan="9">讀取失敗: ' + err + '</td></tr>';
+    });
+}
+window.onload = loadSheetData;
+</script>
 </body>
 </html>
