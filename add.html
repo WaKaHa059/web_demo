@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>Google Sheet 新增資料</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>新增 Google Sheet 資料</h1>
+    <form id="addForm">
+      <label>日期：<input type="date" name="date" required></label>
+      <label>機號：<input type="text" name="machine" required></label>
+      <label>開機錶碼：<input type="text" name="start" required></label>
+      <label>收機錶碼：<input type="text" name="end" required></label>
+      <label>壞紙：<input type="number" name="bad" required></label>
+      <label>實際銷紙：<input type="number" name="real" required></label>
+      <label>銷售金額：<input type="number" name="sale" required></label>
+      <label>額外金額：<input type="number" name="extra" required></label>
+      <label>實際金額：<input type="number" name="actual" required></label>
+      <button type="submit" class="report-btn">送出</button>
+    </form>
+    <div id="result"></div>
+  </div>
+  <script>
+    const PROXY_URL = 'https://morning-sun-421f.lolwahaha958.workers.dev/';
+    document.getElementById('addForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const form = e.target;
+      const data = [
+        form.date.value,
+        form.machine.value,
+        form.start.value,
+        form.end.value,
+        form.bad.value,
+        form.real.value,
+        form.sale.value,
+        form.extra.value,
+        form.actual.value
+      ];
+      fetch(PROXY_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data })
+      })
+        .then(res => res.text())
+        .then(result => {
+          document.getElementById('result').textContent = '✅ 寫入成功！';
+          form.reset();
+        })
+        .catch(err => {
+          document.getElementById('result').textContent = '❌ 寫入失敗: ' + err;
+        });
+    });
+  </script>
+</body>
+</html>
