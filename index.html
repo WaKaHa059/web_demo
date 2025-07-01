@@ -32,10 +32,27 @@
     <p>歡迎參觀我的 <a href="https://github.com/WaKaHa059" target="_blank">GitHub</a>！</p>
     <button id="helloBtn" class="button">打招呼</button>
     <a href="write-gs.html" class="button" style="display:inline-block; margin-top:10px;">寫入 Google Sheet</a>
+    <button id="readSheetBtn" class="button" style="display:inline-block; margin-top:10px;">讀取 Google Sheet</button>
+    <div id="sheetData" style="margin-top:20px;"></div>
   </div>
   <script>
     document.getElementById('helloBtn').addEventListener('click', function() {
       alert('你好！感謝你的造訪。');
+    });
+    document.getElementById('readSheetBtn').addEventListener('click', function() {
+      fetch('https://script.google.com/macros/s/AKfycby5skTEyREQaeiffT6plbFSCZfFWF1wS85m-azZWVB-KgBD5zyrcnAV-YWw354v5SSc/exec')
+        .then(res => res.json())
+        .then(data => {
+          let html = '<table border="1" style="border-collapse:collapse;width:100%">';
+          data.forEach(row => {
+            html += '<tr>' + row.map(cell => `<td>${cell}</td>`).join('') + '</tr>';
+          });
+          html += '</table>';
+          document.getElementById('sheetData').innerHTML = html;
+        })
+        .catch(err => {
+          document.getElementById('sheetData').textContent = '讀取失敗: ' + err;
+        });
     });
   </script>
 </body>
